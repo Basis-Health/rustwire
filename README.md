@@ -15,7 +15,7 @@ This library is designed to manipulate encoded messages, as fast as possible thu
 
 | Benchmark | Rustwire | Prost  |
 | --------- | -------- | ------ |
-| 11 bytes  | 83 ns    | 62 ns  |
+| 11 bytes  | 62 ns    | 83 ns  |
 | 75 bytes  | 207 ns   | 240 ns |
 | 4k bytes  | 63 ns    | 488 ns |
 
