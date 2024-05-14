@@ -1,5 +1,3 @@
-# Copied from https://users.rust-lang.org/u/alexpovel
-
 name: Main
 
 on:
@@ -11,13 +9,10 @@ env:
 jobs:
   build-test:
     name: Build and test (${{ matrix.os }})
-
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-
     runs-on: ${{ matrix.os }}
-
     steps:
       - uses: actions/checkout@v3
       - uses: swatinem/rust-cache@v2
@@ -26,39 +21,20 @@ jobs:
           cargo build
           --locked
           --verbose
-
-      - name: Run tests (without coverage)
-        if: matrix.os != 'ubuntu-latest'
+      - name: Run tests
         run: >
           cargo test
           --verbose
 
-      - name: Run tests (with coverage)
-        if: matrix.os == 'ubuntu-latest'
-        run: >
-          cargo install cargo-tarpaulin
-          && cargo tarpaulin
-          --verbose
-          --out Xml
-          --engine llvm
-          --skip-clean
-      - name: Upload coverage reports to Codecov
-        if: matrix.os == 'ubuntu-latest'
-        uses: codecov/codecov-action@v3
-
   release-please:
     name: Execute release chores
-
     permissions:
       contents: write
       pull-requests: write
-
     runs-on: ubuntu-latest
     needs: build-test
-
     outputs:
       created: ${{ steps.release.outputs.release_created }}
-
     steps:
       - uses: google-github-actions/release-please-action@v3
         id: release
@@ -67,17 +43,13 @@ jobs:
 
   publish:
     name: Publish to crates.io
-
     runs-on: ubuntu-latest
     needs: release-please
     if: needs.release-please.outputs.created
-
     environment: crates.io
-
     steps:
       - uses: actions/checkout@v3
       - uses: swatinem/rust-cache@v2
-
       - name: Publish
         # https://doc.rust-lang.org/cargo/reference/config.html?highlight=CARGO_REGISTRY_TOKEN#credentials
         run: >
