@@ -1,8 +1,7 @@
 pub(crate) fn decode_varint(bytes: &[u8], offset: usize) -> Option<(u64, usize)> {
     let mut result = 0u64;
     let mut shift = 0;
-    for i in offset..bytes.len() {
-        let byte = bytes[i];
+    for (i, byte) in bytes.iter().enumerate().skip(offset) {
         result |= ((byte & 0x7F) as u64) << shift;
         if byte & 0x80 == 0 {
             return Some((result, i + 1));

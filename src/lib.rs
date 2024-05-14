@@ -364,6 +364,8 @@ pub fn replace_field_with(
 /// # Examples
 ///
 /// ```
+/// use rustwire::create_header;
+///
 /// let tag_number = 1;
 /// let variant = 2; // Length-delimited
 /// let encoded_message = b"Hello, world!";
@@ -441,7 +443,7 @@ pub fn create_header(tag_number: u64, variant: u64, encoded_message: &[u8]) -> V
 /// # Examples
 ///
 /// ```
-/// use Variant;
+/// use rustwire::Variant;
 ///
 /// let variant = Variant::LengthDelimited;
 /// let wire_type_value: u64 = variant.into();
@@ -459,9 +461,9 @@ pub enum Variant {
     ThirtyTwoBit,
 }
 
-impl Into<u64> for Variant {
-    fn into(self) -> u64 {
-        match self {
+impl From<Variant> for u64 {
+    fn from(variant: Variant) -> u64 {
+        match variant {
             Variant::Varint => 0,
             Variant::SixtyFourBit => 1,
             Variant::LengthDelimited => 2,

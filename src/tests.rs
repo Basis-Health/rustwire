@@ -436,7 +436,6 @@ mod tests {
         };
         let mut enc = foo.encode_to_vec();
 
-        let new_bar = "You".to_string();
         let new_bar_enc = vec![0x0A, 0x03, b'Y', b'o', b'u'];
 
         println!("{:?}", enc);
