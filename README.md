@@ -1,5 +1,8 @@
 # Rustwire
 
+[![Latest Version](https://img.shields.io/crates/v/rustwire.svg)](https://crates.io/crates/rustwire)
+[docs.rs](https://docs.rs/rustwire/)
+
 A Rust library designed for decoding and manipulating Protobuf-encoded messages.
 
 This is a dependecy-free helper crate and is not meant to be a full-fledged Protobuf library. It is designed to be used in conjunction with a full Protobuf library like `prost` or `protobuf`. The main use case for us for example is to extract nested Protobuf and replace them with just the id of said nested Protobuf.
