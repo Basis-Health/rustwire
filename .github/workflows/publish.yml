@@ -40,6 +40,9 @@ jobs:
         id: release
         with:
           release-type: rust
+          package-name: rustwire
+          default-branch: master
+          bump-minor-pre-major: true
 
   publish:
     name: Publish to crates.io
