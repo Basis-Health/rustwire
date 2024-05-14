@@ -1,7 +1,7 @@
 # Rustwire
 
 [![Latest Version](https://img.shields.io/crates/v/rustwire.svg)](https://crates.io/crates/rustwire)
-[docs.rs](https://docs.rs/rustwire/)
+[docs.rs](https://img.shields.io/docsrs/rustwire)
 
 A Rust library designed for decoding and manipulating Protobuf-encoded messages.
 
