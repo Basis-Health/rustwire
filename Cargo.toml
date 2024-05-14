@@ -1,0 +1,23 @@
+[package]
+name = "rustwire"
+version = "0.1.0"
+authors = ["Alexander Procelewski <alex@basishealth.io>"]
+edition = "2021"
+description = "A Rust library for efficient manipulation of encoded protocol buffer messages."
+readme = "README.md"
+repository = "https://github.com/yourusername/rustwire"
+license = "MIT"
+keywords = [
+    "protobuf",
+    "protocol-buffers",
+    "serialization",
+    "deserialization",
+    "wire-format",
+]
+categories = ["encoding", "parsing"]
+
+
+[dependencies]
+
+[dev-dependencies]
+prost = { version = "0.12", features = ["derive"] }
