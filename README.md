@@ -64,16 +64,22 @@ message User {
 
 Let's assume that we have many `ThisMessage` messages but only few `User`'s. Protobuf is a binary format, and can easily be used to store data in a database. To optimize the storage size, we want to replace the `User` message with just the `id` field. To do this in Prost, you would have to:
 1. Create a new message with just the `id` field instead of the `User` message.
->! Here is the new message:
->! ```protobuf
->! message OutMessage {
->!     int32 field1 = 1;
->!     string field2 = 2;
->!     uint64 field3 = 3;
->!     bool field4 = 4;
->!     int32 user_id = 5;
->! }
->! ```
+
+<details>
+  <summary>The encoded message (<i>click to expand</i>)</summary>
+  <!-- have to be followed by an empty line! -->
+
+```protobuf
+message OutMessage {
+    int32 field1 = 1;
+    string field2 = 2;
+    uint64 field3 = 3;
+    bool field4 = 4;
+    int32 user_id = 5;
+}
+```
+</details>
+
 2. Decode the `ThisMessage` message, then extract the `User` message and replace it with the `id` field.
 3. Encode the new message.
 
