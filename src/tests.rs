@@ -483,8 +483,6 @@ mod tests {
         };
 
         let mut enc = summary.encode_to_vec();
-        let enc_orig = enc.clone();
-
         let uid = vec![0x12, 0x03, b'1', b'2', b'3'];
         replace_field_with(&mut enc, 2, &uid);
 

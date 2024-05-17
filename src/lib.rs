@@ -65,6 +65,7 @@
 //! This crate is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 mod decoders;
+mod encoders;
 mod tests;
 mod utils;
 
@@ -461,3 +462,5 @@ pub enum Variant {
     LengthDelimited,
     ThirtyTwoBit,
 }
+
+pub use encoders::{encode_double, encode_float, encode_varint};

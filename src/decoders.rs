@@ -29,3 +29,30 @@ pub(crate) fn decode_double(encoded_message: &[u8], offset: usize) -> Option<usi
         None
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_decode_varint() {
+        let bytes = [0x96, 0x01];
+        let (result, new_offset) = decode_varint(&bytes, 0).unwrap();
+        assert_eq!(result, 150);
+        assert_eq!(new_offset, 2);
+    }
+
+    #[test]
+    fn test_decode_float() {
+        let bytes = [0x00, 0x00, 0x48, 0x40];
+        let new_offset = decode_float(&bytes, 0).unwrap();
+        assert_eq!(new_offset, 4);
+    }
+
+    #[test]
+    fn test_decode_double() {
+        let bytes = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x24, 0x40];
+        let new_offset = decode_double(&bytes, 0).unwrap();
+        assert_eq!(new_offset, 8);
+    }
+}
