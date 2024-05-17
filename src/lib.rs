@@ -66,6 +66,7 @@
 
 mod decoders;
 mod tests;
+mod utils;
 
 /// Extracts a field with the given tag number from an encoded protobuf message.
 ///
@@ -127,7 +128,7 @@ pub fn extract_field_by_tag(encoded_message: &[u8], tag_number: u64) -> Option<&
                     offset = new_offset;
                     double_slice
                 }),
-                2 => handle_length_delimited(encoded_message, offset),
+                2 => utils::handle_length_delimited(encoded_message, offset),
                 5 => decoders::decode_float(encoded_message, offset).map(|new_offset| {
                     let fixed32_slice = &encoded_message[offset..new_offset];
                     offset = new_offset;
@@ -136,7 +137,7 @@ pub fn extract_field_by_tag(encoded_message: &[u8], tag_number: u64) -> Option<&
                 _ => None,
             };
         } else {
-            offset = skip_field(encoded_message, wire_type, offset)?;
+            offset = utils::skip_field(encoded_message, wire_type, offset)?;
         }
     }
     None
@@ -203,7 +204,7 @@ pub fn extract_multiple_fields_by_tag<'a>(
 
         if tag_numbers.contains(&field_number) {
             let field_value = match wire_type {
-                0 => handle_varint(encoded_message, offset).map(|new_offset| {
+                0 => utils::handle_varint(encoded_message, offset).map(|new_offset| {
                     let value = &encoded_message[offset..new_offset];
                     offset = new_offset;
                     value
@@ -213,7 +214,7 @@ pub fn extract_multiple_fields_by_tag<'a>(
                     offset = new_offset;
                     double_slice
                 }),
-                2 => handle_length_delimited(encoded_message, offset).map(|value| {
+                2 => utils::handle_length_delimited(encoded_message, offset).map(|value| {
                     offset += value.len() + 1; // Skip the length prefix
                     value
                 }),
@@ -229,7 +230,7 @@ pub fn extract_multiple_fields_by_tag<'a>(
                 fields.push((field_number, value));
             }
         } else {
-            offset = match skip_field(encoded_message, wire_type, offset) {
+            offset = match utils::skip_field(encoded_message, wire_type, offset) {
                 Some(new_offset) => new_offset,
                 None => break,
             };
@@ -304,7 +305,7 @@ pub fn replace_field_with(
                     offset = new_offset;
                     double_slice
                 }),
-                2 => handle_length_delimited(encoded_message, offset).map(|value| {
+                2 => utils::handle_length_delimited(encoded_message, offset).map(|value| {
                     offset += value.len() + 1; // Skip the length prefix
                     value
                 }),
@@ -336,7 +337,7 @@ pub fn replace_field_with(
 
             return old;
         } else {
-            offset = skip_field(encoded_message, wire_type, offset)?;
+            offset = utils::skip_field(encoded_message, wire_type, offset)?;
         }
     }
     None
@@ -459,44 +460,4 @@ pub enum Variant {
     SixtyFourBit,
     LengthDelimited,
     ThirtyTwoBit,
-}
-
-impl From<Variant> for u64 {
-    fn from(variant: Variant) -> u64 {
-        match variant {
-            Variant::Varint => 0,
-            Variant::SixtyFourBit => 1,
-            Variant::LengthDelimited => 2,
-            Variant::ThirtyTwoBit => 5,
-        }
-    }
-}
-
-#[inline]
-fn handle_varint(encoded_message: &[u8], offset: usize) -> Option<usize> {
-    decoders::decode_varint(encoded_message, offset).map(|(_, new_offset)| new_offset)
-}
-
-#[inline]
-fn handle_length_delimited(encoded_message: &[u8], offset: usize) -> Option<&[u8]> {
-    let (length, offset) = decoders::decode_varint(encoded_message, offset)?;
-    let end_offset = offset + length as usize;
-    if end_offset > encoded_message.len() {
-        return None;
-    }
-    Some(&encoded_message[offset..end_offset])
-}
-
-#[inline]
-fn skip_field(encoded_message: &[u8], wire_type: u64, offset: usize) -> Option<usize> {
-    match wire_type {
-        0 => decoders::decode_varint(encoded_message, offset).map(|(_, new_offset)| new_offset),
-        1 => Some(offset + 8),
-        2 => {
-            let (length, offset) = decoders::decode_varint(encoded_message, offset)?;
-            Some(offset + length as usize)
-        }
-        5 => Some(offset + 4),
-        _ => None,
-    }
 }
