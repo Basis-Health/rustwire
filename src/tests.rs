@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod tests {
-    use prost::Message;
-
     use crate::{
         create_header, extract_field_by_tag, extract_multiple_fields_by_tag, replace_field_with,
     };
+    use prost::Message;
 
+    /// Test extracting a single field from a simple message.
     #[test]
     fn extract_single_field() {
         #[derive(Message)]
@@ -23,6 +23,7 @@ mod tests {
         assert_eq!(bar, b"Me");
     }
 
+    /// Test extracting a single field from a message with multiple fields.
     #[test]
     fn extract_single_field_from_message_with_multiple_fields() {
         #[derive(Message)]
@@ -43,6 +44,7 @@ mod tests {
         assert_eq!(bar, b"Me");
     }
 
+    /// Test extracting multiple fields from a message.
     #[test]
     fn extract_multiple_fields() {
         #[derive(Message)]
@@ -59,8 +61,6 @@ mod tests {
         };
         let enc = foo.encode_to_vec();
 
-        println!("{:?}", enc);
-
         let fields = extract_multiple_fields_by_tag(&enc, &[1, 2]);
         assert_eq!(fields.len(), 2);
         assert_eq!(fields[0].0, 1);
@@ -69,6 +69,7 @@ mod tests {
         assert_eq!(fields[1].1, b"You");
     }
 
+    /// Test extracting a subset of fields from a message.
     #[test]
     fn extract_subset_of_fields() {
         #[derive(Message)]
@@ -91,6 +92,7 @@ mod tests {
         assert_eq!(fields[0].1, b"Me");
     }
 
+    /// Test extracting a field that does not exist in the message.
     #[test]
     fn extract_missing_field() {
         #[derive(Message)]
@@ -111,6 +113,7 @@ mod tests {
         assert_eq!(fields.len(), 0);
     }
 
+    /// Test extracting a varint field from a message.
     #[test]
     fn extract_field_with_varint() {
         #[derive(Message)]
@@ -122,12 +125,11 @@ mod tests {
         let foo = Foo { bar: 42 };
         let enc = foo.encode_to_vec();
 
-        println!("{:?}", enc);
-
         let bar = extract_field_by_tag(&enc, 1).unwrap();
         assert_eq!(bar, b"\x2A");
     }
 
+    /// Test extracting the maximum value of a u64 field.
     #[test]
     fn extract_u64_max() {
         #[derive(Message)]
@@ -143,6 +145,7 @@ mod tests {
         assert_eq!(bar, b"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x01");
     }
 
+    /// Test extracting multiple fields with different types.
     #[test]
     fn extract_u64_max_and_string() {
         #[derive(Message)]
@@ -166,6 +169,7 @@ mod tests {
         assert_eq!(baz, b"Me");
     }
 
+    /// Test extracting multiple varint fields from a message.
     #[test]
     fn extract_multiple_fields_with_varint() {
         #[derive(Message)]
@@ -187,6 +191,7 @@ mod tests {
         assert_eq!(fields[1].1, b"\x2B");
     }
 
+    /// Test extracting a field while skipping another field.
     #[test]
     fn extract_field_skip_string() {
         #[derive(Message)]
@@ -207,6 +212,7 @@ mod tests {
         assert_eq!(baz, b"\x2A");
     }
 
+    /// Test extracting optional fields from a message.
     #[test]
     fn extract_optional_field() {
         #[derive(Message)]
@@ -254,6 +260,7 @@ mod tests {
         assert_eq!(baz, None);
     }
 
+    /// Test extracting repeated fields from a message.
     #[test]
     fn extract_repeated_field() {
         #[derive(Message)]
@@ -278,6 +285,7 @@ mod tests {
         assert_eq!(fields[1].1, b"\x2A\x2B");
     }
 
+    /// Test extracting specific fields while skipping repeated fields.
     #[test]
     fn extract_skip_repeated_field() {
         #[derive(Message)]
@@ -305,6 +313,7 @@ mod tests {
         assert_eq!(fields[1].1, b"\x2C");
     }
 
+    /// Test extracting a nested message field.
     #[test]
     fn test_extract_nested_message() {
         #[derive(Message)]
@@ -338,6 +347,7 @@ mod tests {
         assert_eq!(bar, b"\x08\x2A");
     }
 
+    /// Test extracting a nested message from a nested field.
     #[test]
     fn test_extract_nested_message_from_nested_field() {
         #[derive(Message)]
@@ -382,6 +392,7 @@ mod tests {
         assert_eq!(fields[1].1, b"\x08\x2A");
     }
 
+    /// Test extracting a double field.
     #[test]
     fn test_extract_double() {
         #[derive(Message)]
@@ -393,14 +404,13 @@ mod tests {
         let foo = Foo { bar: 42.0 };
         let enc = foo.encode_to_vec();
 
-        println!("{:?}", enc);
-
         let fields = extract_multiple_fields_by_tag(&enc, &[1]);
         assert_eq!(fields.len(), 1);
         assert_eq!(fields[0].0, 1);
         assert_eq!(fields[0].1, 42.0f64.to_le_bytes());
     }
 
+    /// Test extracting a float field.
     #[test]
     fn test_extract_float() {
         #[derive(Message)]
@@ -412,14 +422,13 @@ mod tests {
         let foo = Foo { bar: 42.0 };
         let enc = foo.encode_to_vec();
 
-        println!("{:?}", enc);
-
         let fields = extract_multiple_fields_by_tag(&enc, &[1]);
         assert_eq!(fields.len(), 1);
         assert_eq!(fields[0].0, 1);
         assert_eq!(fields[0].1, 42.0f32.to_le_bytes());
     }
 
+    /// Test replacing a field with new data.
     #[test]
     fn test_replace_field() {
         #[derive(Message)]
@@ -437,23 +446,17 @@ mod tests {
         let mut enc = foo.encode_to_vec();
 
         let new_bar_enc = vec![0x0A, 0x03, b'Y', b'o', b'u'];
-
-        println!("{:?}", enc);
         replace_field_with(&mut enc, 1, &new_bar_enc);
-        println!("{:?}", enc);
+
         let fields = extract_multiple_fields_by_tag(&enc, &[1, 2]);
-
-        println!("{:?}", fields);
-
         assert_eq!(fields.len(), 2);
         assert_eq!(fields[0].0, 1);
         assert_eq!(fields[0].1, b"You");
     }
 
+    /// Test replacing a nested message with a specific field.
     #[test]
     fn test_replace_nested_message_with_field() {
-        // This test is the most important one!
-        // Let's define the following two structs
         #[derive(Message, PartialEq, Clone)]
         struct User {
             #[prost(string, tag = "1")]
@@ -470,7 +473,6 @@ mod tests {
             user: ::core::option::Option<User>,
         }
 
-        // Let's create a Summary object
         let user = User {
             name: "Alice".to_string(),
             uid: "123".to_string(),
@@ -480,22 +482,12 @@ mod tests {
             user: Some(user.clone()),
         };
 
-        // Now when we encode the Summary object, we get the following bytes
         let mut enc = summary.encode_to_vec();
         let enc_orig = enc.clone();
-        println!("{:?}", enc);
 
-        // But we don't want to send the entire User object, we just want to send the uid field
-        // So we want to dynamically replace the User object with the uid field
         let uid = vec![0x12, 0x03, b'1', b'2', b'3'];
-
-        // Let's replace the User object with the uid field
         replace_field_with(&mut enc, 2, &uid);
 
-        // Now the encoded bytes should only contain the uid field
-        println!("{:?}", enc);
-
-        // Let's decode the bytes and check if the uid field is correct
         #[derive(Message, PartialEq)]
         struct SummaryUid {
             #[prost(uint64, tag = "1")]
@@ -508,29 +500,21 @@ mod tests {
             count: 1,
             uid: "123".to_string(),
         };
-        println!("should be: {:?}", should_be.encode_to_vec());
-        println!("enc:       {:?}", enc);
 
         let summary_uid = SummaryUid::decode(enc.as_slice()).unwrap();
         assert_eq!(summary_uid, should_be);
 
-        // When we decode we need to replace the summary again with the user object
         let mut user_enc = user.encode_to_vec();
-        // prepend the tag and length
         user_enc.insert(0, user_enc.len() as u8);
         user_enc.insert(0, 18);
 
-        println!("before:    {:?}", enc);
         replace_field_with(&mut enc, 2, &user_enc);
-        println!("should be: {:?}", enc_orig);
-        println!("enc:       {:?}", enc);
 
         let new_summary = Summary::decode(enc.as_slice()).unwrap();
         assert_eq!(new_summary, summary);
-
-        // The test passes!
     }
 
+    /// Test extracting a string field longer than 255 bytes.
     #[test]
     fn test_extract_string_longer_than_255() {
         #[derive(Message)]
@@ -544,21 +528,18 @@ mod tests {
         };
         let enc = foo.encode_to_vec();
 
-        println!("{:?}", enc);
-
         let fields = extract_multiple_fields_by_tag(&enc, &[1]);
         assert_eq!(fields.len(), 1);
         assert_eq!(fields[0].0, 1);
         assert_eq!(fields[0].1, "A".repeat(512).as_bytes());
     }
 
+    /// Test creating a header for a message.
     #[test]
     fn test_create_header() {
         let data = b"Hello";
         let header = create_header(1, 2, data);
 
-        // header should be tag 1, length 5, varint 2
-        println!("{:?}", header);
         let expected = vec![(1 << 3) | 2, 5];
         assert_eq!(header, expected);
     }
